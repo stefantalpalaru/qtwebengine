@@ -588,10 +588,29 @@ LiftoffRegister LiftoffAssembler::PeekToRegister(int index,
   return reg;
 }
 
-void LiftoffAssembler::SpillLoopArgs(int num) {
+void LiftoffAssembler::PrepareLoopArgs(int num) {
   for (int i = 0; i < num; ++i) {
     VarState& slot = cache_state_.stack_state.end()[-1 - i];
-    Spill(&slot);
+    if (slot.is_stack()) continue;
+    RegClass rc = reg_class_for(slot.type());
+    if (slot.is_reg()) {
+      if (cache_state_.get_use_count(slot.reg()) > 1) {
+        // If the register is used more than once, we cannot use it for the
+        // merge. Move it to an unused register instead.
+        LiftoffRegList pinned;
+        pinned.set(slot.reg());
+        LiftoffRegister dst_reg = GetUnusedRegister(rc, pinned);
+        Move(dst_reg, slot.reg(), slot.type());
+        cache_state_.dec_used(slot.reg());
+        cache_state_.inc_used(dst_reg);
+        slot.MakeRegister(dst_reg);
+      }
+      continue;
+    }
+    LiftoffRegister reg = GetUnusedRegister(rc, {});
+    LoadConstant(reg, slot.constant());
+    slot.MakeRegister(reg);
+    cache_state_.inc_used(reg);
   }
 }
 
@@ -674,7 +693,8 @@ void LiftoffAssembler::SpillLocals() {
 }
 
 void LiftoffAssembler::SpillAllRegisters() {
-  for (VarState& slot : cache_state_.stack_state) {
+  for (uint32_t i = 0, e = cache_state_.stack_height(); i < e; ++i) {
+    auto& slot = cache_state_.stack_state[i];
     if (!slot.is_reg()) continue;
     Spill(slot.offset(), slot.reg(), slot.type());
     slot.MakeStack();

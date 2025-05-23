@@ -321,8 +321,7 @@ Maybe<bool> JSReceiver::SetOrCopyDataProperties(
                               GetKeysConversion::kKeepNumbers),
       Nothing<bool>());
 
-  if (!from->HasFastProperties() && target->HasFastProperties() &&
-      target->IsJSObject()) {
+  if (!from->HasFastProperties() && target->HasFastProperties()) {
     // Convert to slow properties if we're guaranteed to overflow the number of
     // descriptors.
     int source_length =

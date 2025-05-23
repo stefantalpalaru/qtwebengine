@@ -12,7 +12,6 @@
 #include "include/utils/SkRandom.h"
 #include "src/core/SkMatrixPriv.h"
 #include "src/core/SkRectPriv.h"
-#include "src/core/SkSafeMath.h"
 #include "src/gpu/GrCaps.h"
 #include "src/gpu/GrDefaultGeoProcFactory.h"
 #include "src/gpu/GrDrawOpTest.h"
@@ -111,7 +110,6 @@ DrawAtlasOp::DrawAtlasOp(const Helper::MakeArgs& helperArgs, const SkPMColor4f& 
         : INHERITED(ClassID()), fHelper(helperArgs, aaType), fColor(color) {
     SkASSERT(xforms);
     SkASSERT(rects);
-    SkASSERT(spriteCount >= 0);
 
     fViewMatrix = viewMatrix;
     Geometry& installedGeo = fGeoData.push_back();
@@ -125,11 +123,6 @@ DrawAtlasOp::DrawAtlasOp(const Helper::MakeArgs& helperArgs, const SkPMColor4f& 
     if (colors) {
         texOffset += sizeof(GrColor);
         vertexStride += sizeof(GrColor);
-    }
-
-    // Bail out if we'd overflow from a really large draw
-    if (spriteCount > SK_MaxS32 / static_cast<int>(4 * vertexStride)) {
-        return;
     }
 
     // Compute buffer size and alloc buffer
@@ -281,14 +274,8 @@ GrOp::CombineResult DrawAtlasOp::onCombineIfPossible(GrOp* t, GrRecordingContext
         return CombineResult::kCannotCombine;
     }
 
-    SkSafeMath safeMath;
-    int newQuadCount = safeMath.addInt(fQuadCount, that->quadCount());
-    if (!safeMath) {
-        return CombineResult::kCannotCombine;
-    }
-
     fGeoData.push_back_n(that->fGeoData.count(), that->fGeoData.begin());
-    fQuadCount = newQuadCount;
+    fQuadCount += that->quadCount();
 
     return CombineResult::kMerged;
 }

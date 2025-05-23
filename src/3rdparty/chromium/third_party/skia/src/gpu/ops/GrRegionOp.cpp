@@ -9,7 +9,6 @@
 
 #include "include/core/SkRegion.h"
 #include "src/core/SkMatrixPriv.h"
-#include "src/core/SkSafeMath.h"
 #include "src/gpu/GrCaps.h"
 #include "src/gpu/GrDefaultGeoProcFactory.h"
 #include "src/gpu/GrDrawOpTest.h"
@@ -114,14 +113,11 @@ private:
 
         int numRegions = fRegions.count();
         int numRects = 0;
-
-        SkSafeMath safeMath;
         for (int i = 0; i < numRegions; i++) {
-            numRects = safeMath.addInt(numRects, fRegions[i].fRegion.computeRegionComplexity());
+            numRects += fRegions[i].fRegion.computeRegionComplexity();
         }
 
-        if (!numRects || !safeMath) {
-            // This is a nonsensical draw, so we can just drop it.
+        if (!numRects) {
             return;
         }
 

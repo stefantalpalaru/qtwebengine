@@ -405,11 +405,8 @@ bool AudioHandler::InputsAreSilent() {
 }
 
 void AudioHandler::SilenceOutputs() {
-  for (auto& output : outputs_) {
-    if (output->IsConnectedDuringRendering()) {
-      output->Bus()->Zero();
-    }
-  }
+  for (auto& output : outputs_)
+    output->Bus()->Zero();
 }
 
 void AudioHandler::UnsilenceOutputs() {

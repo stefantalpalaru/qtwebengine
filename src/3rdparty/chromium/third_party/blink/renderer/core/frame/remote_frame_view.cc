@@ -114,10 +114,8 @@ void RemoteFrameView::SetNeedsOcclusionTracking(bool needs_tracking) {
     return;
   needs_occlusion_tracking_ = needs_tracking;
   if (needs_tracking) {
-    if (LocalFrameView* parent_view = ParentLocalRootFrameView()) {
-      parent_view->SetIntersectionObservationState(LocalFrameView::kRequired);
+    if (LocalFrameView* parent_view = ParentLocalRootFrameView())
       parent_view->ScheduleAnimation();
-    }
   }
 }
 
@@ -184,6 +182,7 @@ void RemoteFrameView::Dispose() {
   // RemoteFrameView is disconnected before detachment.
   if (owner_element && owner_element->OwnedEmbeddedContentView() == this)
     owner_element->SetEmbeddedContentView(nullptr);
+  SetNeedsOcclusionTracking(false);
 }
 
 void RemoteFrameView::InvalidateRect(const IntRect& rect) {

@@ -97,7 +97,6 @@ void CFFL_ComboBox::SaveData(CPDFSDK_PageView* pPageView) {
   if (m_pWidget->GetFieldFlags() & pdfium::form_flags::kChoiceEdit)
     bSetValue = (nCurSel < 0) || (swText != m_pWidget->GetOptionLabel(nCurSel));
 
-  ObservedPtr<CPDFSDK_Widget> observed_widget(m_pWidget.Get());
   if (bSetValue) {
     m_pWidget->SetValue(swText, NotificationOption::kDoNotNotify);
   } else {
@@ -105,18 +104,16 @@ void CFFL_ComboBox::SaveData(CPDFSDK_PageView* pPageView) {
     m_pWidget->SetOptionSelection(nCurSel, true,
                                   NotificationOption::kDoNotNotify);
   }
-  if (!observed_widget) {
-    return;
-  }
+  ObservedPtr<CPDFSDK_Widget> observed_widget(m_pWidget.Get());
   ObservedPtr<CFFL_ComboBox> observed_this(this);
   m_pWidget->ResetFieldAppearance();
-  if (!observed_widget) {
+  if (!observed_widget)
     return;
-  }
+
   m_pWidget->UpdateField();
-  if (!observed_widget || !observed_this) {
+  if (!observed_widget || !observed_this)
     return;
-  }
+
   SetChangeMark();
 }
 

@@ -615,12 +615,8 @@ void ThrottlingURLLoader::OnReceiveResponse(
     for (auto& entry : throttles_) {
       auto* throttle = entry.throttle.get();
       bool throttle_deferred = false;
-      auto weak_ptr = weak_factory_.GetWeakPtr();
       throttle->BeforeWillProcessResponse(response_url_, *response_head,
                                           &throttle_deferred);
-      if (!weak_ptr) {
-        return;
-      }
       if (!HandleThrottleResult(throttle, throttle_deferred, &deferred))
         return;
     }
@@ -643,12 +639,8 @@ void ThrottlingURLLoader::OnReceiveResponse(
     for (auto& entry : throttles_) {
       auto* throttle = entry.throttle.get();
       bool throttle_deferred = false;
-      auto weak_ptr = weak_factory_.GetWeakPtr();
       throttle->WillProcessResponse(response_url_, response_head.get(),
                                     &throttle_deferred);
-      if (!weak_ptr) {
-        return;
-      }
       if (!HandleThrottleResult(throttle, throttle_deferred, &deferred))
         return;
     }
@@ -789,11 +781,7 @@ void ThrottlingURLLoader::OnComplete(
     for (auto& entry : throttles_) {
       auto* throttle = entry.throttle.get();
       bool throttle_deferred = false;
-      auto weak_ptr = weak_factory_.GetWeakPtr();
       throttle->WillOnCompleteWithError(status, &throttle_deferred);
-      if (!weak_ptr) {
-        return;
-      }
       if (!HandleThrottleResult(throttle, throttle_deferred, &deferred))
         return;
     }

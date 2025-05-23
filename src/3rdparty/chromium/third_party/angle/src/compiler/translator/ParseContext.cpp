@@ -34,39 +34,27 @@ namespace
 
 const int kWebGLMaxStructNesting = 4;
 
-struct IsSamplerFunc
-{
-    bool operator()(TBasicType type) { return IsSampler(type); }
-};
-struct IsOpaqueFunc
-{
-    bool operator()(TBasicType type) { return IsOpaqueType(type); }
-};
+bool ContainsSampler(const TStructure *structType);
 
-template <typename OpaqueFunc>
-bool ContainsOpaque(const TStructure *structType);
-
-template <typename OpaqueFunc>
-bool ContainsOpaque(const TType &type)
+bool ContainsSampler(const TType &type)
 {
-    if (OpaqueFunc{}(type.getBasicType()))
+    if (IsSampler(type.getBasicType()))
     {
         return true;
     }
     if (type.getBasicType() == EbtStruct)
     {
-        return ContainsOpaque<OpaqueFunc>(type.getStruct());
+        return ContainsSampler(type.getStruct());
     }
 
     return false;
 }
 
-template <typename OpaqueFunc>
-bool ContainsOpaque(const TStructure *structType)
+bool ContainsSampler(const TStructure *structType)
 {
     for (const auto &field : structType->fields())
     {
-        if (ContainsOpaque<OpaqueFunc>(*field->type()))
+        if (ContainsSampler(*field->type()))
             return true;
     }
     return false;
@@ -927,7 +915,7 @@ bool TParseContext::checkIsNotOpaqueType(const TSourceLoc &line,
 {
     if (pType.type == EbtStruct)
     {
-        if (ContainsOpaque<IsSamplerFunc>(pType.userDef))
+        if (ContainsSampler(pType.userDef))
         {
             std::stringstream reasonStream = sh::InitializeStream<std::stringstream>();
             reasonStream << reason << " (structure contains a sampler)";
@@ -3912,9 +3900,12 @@ TIntermDeclaration *TParseContext::addInterfaceBlock(
     {
         TField *field    = (*fieldList)[memberIndex];
         TType *fieldType = field->type();
-        if (ContainsOpaque<IsOpaqueFunc>(*fieldType))
+        if (IsOpaqueType(fieldType->getBasicType()))
         {
-            error(field->line(), "Opaque types are not allowed in interface blocks", blockName);
+            std::string reason("unsupported type - ");
+            reason += fieldType->getBasicString();
+            reason += " types are not allowed in interface blocks";
+            error(field->line(), reason.c_str(), fieldType->getBasicString());
         }
 
         const TQualifier qualifier = fieldType->getQualifier();

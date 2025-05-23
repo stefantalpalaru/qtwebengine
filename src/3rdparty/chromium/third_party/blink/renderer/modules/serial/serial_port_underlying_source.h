@@ -8,7 +8,6 @@
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/cpp/system/simple_watcher.h"
 #include "third_party/blink/renderer/core/streams/underlying_source_base.h"
-#include "third_party/blink/renderer/platform/heap/thread_state.h"
 
 namespace blink {
 
@@ -17,7 +16,6 @@ class ScriptPromiseResolver;
 class SerialPort;
 
 class SerialPortUnderlyingSource : public UnderlyingSourceBase {
-  USING_PRE_FINALIZER(SerialPortUnderlyingSource, Dispose);
  public:
   SerialPortUnderlyingSource(ScriptState*,
                              SerialPort*,
@@ -44,7 +42,6 @@ class SerialPortUnderlyingSource : public UnderlyingSourceBase {
   void ExpectPipeClose();
   void PipeClosed();
   void Close();
-  void Dispose();
 
   mojo::ScopedDataPipeConsumerHandle data_pipe_;
   mojo::SimpleWatcher watcher_;
