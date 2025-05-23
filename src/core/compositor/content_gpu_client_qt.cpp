@@ -52,11 +52,9 @@
 #include <QGuiApplication>
 #include <qpa/qplatformnativeinterface.h>
 
-#if QT_CONFIG(opengl)
 QT_BEGIN_NAMESPACE
 Q_GUI_EXPORT QOpenGLContext *qt_gl_global_share_context();
 QT_END_NAMESPACE
-#endif
 
 namespace QtWebEngineCore {
 

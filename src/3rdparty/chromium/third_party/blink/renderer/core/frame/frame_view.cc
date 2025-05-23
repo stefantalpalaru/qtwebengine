@@ -71,9 +71,6 @@ void FrameView::UpdateViewportIntersection(unsigned flags,
       needs_occlusion_tracking &&
       occlusion_state == FrameOcclusionState::kGuaranteedNotOccluded &&
       parent_lifecycle_state >= DocumentLifecycle::kPrePaintClean;
-  if (!should_compute_occlusion) {
-    occlusion_state = FrameOcclusionState::kUnknown;
-  }
 
   LayoutEmbeddedContent* owner_layout_object =
       owner_element->GetLayoutEmbeddedContent();

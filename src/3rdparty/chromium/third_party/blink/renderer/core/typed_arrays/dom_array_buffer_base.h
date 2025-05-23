@@ -33,7 +33,7 @@ class CORE_EXPORT DOMArrayBufferBase : public ScriptWrappable {
     return base::checked_cast<unsigned>(contents_.DataLength());
   }
 
-  virtual bool IsDetached() const { return is_detached_; }
+  bool IsDetached() const { return is_detached_; }
 
   void Detach() { is_detached_ = true; }
 

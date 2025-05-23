@@ -5300,11 +5300,6 @@ class V8_EXPORT ArrayBuffer : public Object {
   bool IsDetachable() const;
 
   /**
-   * Returns true if this ArrayBuffer has been detached.
-   */
-  bool WasDetached() const;
-
-  /**
    * Detaches this ArrayBuffer and all its views (typed arrays).
    * Detaching sets the byte length of the buffer and all typed arrays to zero,
    * preventing JavaScript from ever accessing underlying backing store.

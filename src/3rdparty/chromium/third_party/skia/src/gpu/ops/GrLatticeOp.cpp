@@ -9,7 +9,6 @@
 #include "include/core/SkRect.h"
 #include "src/core/SkLatticeIter.h"
 #include "src/core/SkMatrixPriv.h"
-#include "src/core/SkSafeMath.h"
 #include "src/gpu/GrDrawOpTest.h"
 #include "src/gpu/GrGpu.h"
 #include "src/gpu/GrOpFlushState.h"
@@ -226,13 +225,11 @@ private:
 
         int patchCnt = fPatches.count();
         int numRects = 0;
-
-        SkSafeMath safeMath;
         for (int i = 0; i < patchCnt; i++) {
-            numRects = safeMath.addInt(numRects, fPatches[i].fIter->numRectsToDraw());
+            numRects += fPatches[i].fIter->numRectsToDraw();
         }
 
-        if (!numRects || !safeMath) {
+        if (!numRects) {
             return;
         }
 

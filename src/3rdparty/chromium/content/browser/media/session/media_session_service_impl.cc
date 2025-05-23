@@ -19,16 +19,14 @@ MediaSessionServiceImpl::MediaSessionServiceImpl(
       render_frame_routing_id_(render_frame_host->GetRoutingID()),
       playback_state_(blink::mojom::MediaSessionPlaybackState::NONE) {
   MediaSessionImpl* session = GetMediaSession();
-  if (session) {
-    media_session_ = session->GetWeakPtr();
-    media_session_->OnServiceCreated(this);
-  }
+  if (session)
+    session->OnServiceCreated(this);
 }
 
 MediaSessionServiceImpl::~MediaSessionServiceImpl() {
-  if (media_session_) {
-    media_session_->OnServiceDestroyed(this);
-  }
+  MediaSessionImpl* session = GetMediaSession();
+  if (session)
+    session->OnServiceDestroyed(this);
 }
 
 // static
@@ -65,17 +63,17 @@ void MediaSessionServiceImpl::SetClient(
 void MediaSessionServiceImpl::SetPlaybackState(
     blink::mojom::MediaSessionPlaybackState state) {
   playback_state_ = state;
-  if (media_session_) {
-    media_session_->OnMediaSessionPlaybackStateChanged(this);
-  }
+  MediaSessionImpl* session = GetMediaSession();
+  if (session)
+    session->OnMediaSessionPlaybackStateChanged(this);
 }
 
 void MediaSessionServiceImpl::SetPositionState(
     const base::Optional<media_session::MediaPosition>& position) {
   position_ = position;
-  if (media_session_) {
-    media_session_->RebuildAndNotifyMediaPositionChanged();
-  }
+  MediaSessionImpl* session = GetMediaSession();
+  if (session)
+    session->RebuildAndNotifyMediaPositionChanged();
 }
 
 void MediaSessionServiceImpl::SetMetadata(
@@ -97,31 +95,32 @@ void MediaSessionServiceImpl::SetMetadata(
     metadata_ = std::move(metadata);
   }
 
-  if (media_session_) {
-    media_session_->OnMediaSessionMetadataChanged(this);
-  }
+  MediaSessionImpl* session = GetMediaSession();
+  if (session)
+    session->OnMediaSessionMetadataChanged(this);
 }
 
 void MediaSessionServiceImpl::EnableAction(
     media_session::mojom::MediaSessionAction action) {
   actions_.insert(action);
-  if (media_session_) {
-    media_session_->OnMediaSessionActionsChanged(this);
-  }
+  MediaSessionImpl* session = GetMediaSession();
+  if (session)
+    session->OnMediaSessionActionsChanged(this);
 }
 
 void MediaSessionServiceImpl::DisableAction(
     media_session::mojom::MediaSessionAction action) {
   actions_.erase(action);
-  if (media_session_) {
-    media_session_->OnMediaSessionActionsChanged(this);
-  }
+  MediaSessionImpl* session = GetMediaSession();
+  if (session)
+    session->OnMediaSessionActionsChanged(this);
 }
 
 void MediaSessionServiceImpl::ClearActions() {
   actions_.clear();
-  if (media_session_)
-    media_session_->OnMediaSessionActionsChanged(this);
+  MediaSessionImpl* session = GetMediaSession();
+  if (session)
+    session->OnMediaSessionActionsChanged(this);
 }
 
 MediaSessionImpl* MediaSessionServiceImpl::GetMediaSession() {
