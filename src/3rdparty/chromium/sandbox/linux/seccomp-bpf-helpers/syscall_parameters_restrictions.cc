@@ -32,12 +32,17 @@
 #include "sandbox/linux/system_headers/linux_syscalls.h"
 #include "sandbox/linux/system_headers/linux_time.h"
 
+#if !defined(MAP_DROPPABLE)
+#define MAP_DROPPABLE 0x08    // Zero memory under memory pressure.
+#endif
+
 // PNaCl toolchain does not provide sys/ioctl.h and sys/ptrace.h headers.
 #if !defined(OS_NACL_NONSFI)
 #include <sys/ioctl.h>
 #include <sys/ptrace.h>
 #if defined(OS_LINUX) && !defined(OS_CHROMEOS) && !defined(__arm__) && \
     !defined(__aarch64__) && !defined(PTRACE_GET_THREAD_AREA)
+
 // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance
 // the one in Ubuntu 16.04 LTS) is missing PTRACE_GET_THREAD_AREA.
 // asm/ptrace-abi.h doesn't exist on arm32 and PTRACE_GET_THREAD_AREA isn't
@@ -212,7 +217,7 @@ ResultExpr RestrictMmapFlags() {
   // TODO(davidung), remove MAP_DENYWRITE with updated Tegra libraries.
   const uint64_t kAllowedMask = MAP_SHARED | MAP_PRIVATE | MAP_ANONYMOUS |
                                 MAP_STACK | MAP_NORESERVE | MAP_FIXED |
-                                MAP_DENYWRITE;
+                                MAP_DENYWRITE | MAP_DROPPABLE;
   const Arg<int> flags(3);
   return If((flags & ~kAllowedMask) == 0, Allow()).Else(CrashSIGSYS());
 }
